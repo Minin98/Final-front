@@ -30,23 +30,30 @@ export default function ClassPage() {
     const isClassOwner = classInfo?.uno && decodeToken?.sub && grade === 1 && String(decodeToken.sub) === String(classInfo?.uno);
 
     // 강의 정보 불러오기
-    const fetchClassInfo = useCallback(() => {
+    const fetchClassInfo = useCallback(async () => {
+        if (!user?.token) return;
+        
         setLoading(true);
-        apiAxios.get(`/class/${classNumber}`)
-            .then((res) => {
-                if (res.data.class) {
-                    setClassInfo(res.data.class);
-                } else {
-                    console.error("강의 정보가 존재하지 않습니다.");
-                }
-            })
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false));
-    }, [classNumber]);
+        try {
+            const res = await apiAxios.get(`/class/${classNumber}`, {
+                headers: { "Authorization": `Bearer ${user.token}` }
+            });
+            if (res.data.class) {
+                setClassInfo(res.data.class);
+                setChapters(res.data.chapter || []);
+            } else {
+                console.error("강의 정보가 존재하지 않습니다.");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [classNumber, user?.token]);
 
     // 수강 여부 확인
     const checkEnrollmentStatus = useCallback(() => {
-        if (!user.token) return;
+        if (!user?.token) return;
 
         apiAxios.get(`/usersProgress/check?classNumber=${classNumber}`, {
             headers: { "Authorization": `Bearer ${user.token}` }
@@ -55,7 +62,7 @@ export default function ClassPage() {
                 setIsEnrolled(res.data.isEnrolled);
             })
             .catch((err) => console.error("수강 여부 확인 실패", err));
-    }, [classNumber]);
+    }, [classNumber, user?.token]);
 
     useEffect(() => {
         if (!classNumber) {

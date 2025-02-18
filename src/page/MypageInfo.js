@@ -1,4 +1,4 @@
-import { React, useEffect, useState, useRef } from "react";
+import { React, useEffect, useState, useRef, useCallback } from "react";
 import "../css/MypageInfo.css";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -30,8 +30,8 @@ export default function MypageInfo() {
       phone: false
     }
   );
-
-  useEffect(() => {
+  
+  const fetchUserInfo = useCallback(() => {
     if (!token) {
       console.error("토큰이 없습니다.");
       return;
@@ -40,26 +40,24 @@ export default function MypageInfo() {
     const decodedToken = jwtDecode(token);
     setType(decodedToken.type);
 
-    // 사용자 정보 가져오기
     axios
-      .post(
-        "http://localhost:9999/MypageInfo",
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      .post("http://localhost:9999/MypageInfo", {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       .then((res) => {
         setUserInfo(res.data);
         setOriginInfo(res.data);
       })
       .catch((err) => console.error("요청 에러:", err));
+  }, [token]);
 
-    // 프로필 이미지 가져오기 (Base64 대신 URL 반환)
+  const fetchProfileImage = useCallback(() => {
+    if (!token) return;
+
     axios
-      .post(
-        "http://localhost:9999/ProfileImage",
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      .post("http://localhost:9999/ProfileImage", {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       .then((res) => {
         console.log("서버 응답:", res.data);
         if (res.data.profileImageUrl && res.data.profileImageUrl !== "non") {
@@ -69,7 +67,13 @@ export default function MypageInfo() {
         }
       })
       .catch((err) => console.error("요청 에러:", err));
-  }, [dataRoad]);
+  }, [token]);
+
+  useEffect(() => {
+    fetchUserInfo();
+    fetchProfileImage();
+  }, [token, fetchUserInfo, fetchProfileImage]);
+
 
   // 파일 선택 시 미리보기 표시
   const handleFileChange = (event) => {
@@ -281,7 +285,7 @@ export default function MypageInfo() {
           {type === 0 && (
             <Link className="password-change" to="/checkUser" state="/updatePassword">비밀번호 변경하기</Link>
           )}
-        </div> 
+        </div>
       </div>
     </div>
   );

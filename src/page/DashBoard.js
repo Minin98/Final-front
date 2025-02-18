@@ -9,19 +9,21 @@ export default function DashBoard() {
     const user = useSelector((state) => state.users.value);
     const [recentClasses, setRecentClasses] = useState([]);
     const [classList, setClassList] = useState([]);
-    //퀴즈 진행률
-    const [classQuizProgress, setClassQuizProgress] = useState([]);
+    const [classQuizProgress, setClassQuizProgress] = useState([]); // 퀴즈 진행률
+    const [userRole, setUserRole] = useState(null);
 
     const navigate = useNavigate();
-    let userRole = null;
-
-    // JWT 토큰 디코딩
-    if (user.token) {
-        const decodeToken = jwtDecode(user.token);
-        userRole = decodeToken.grade;
-    }
 
     useEffect(() => {
+        if (user.token) {
+            const decodeToken = jwtDecode(user.token);
+            setUserRole(decodeToken.grade);
+        }
+    }, [user.token]);
+
+    useEffect(() => {
+        if (!user.token || userRole === null) return;
+
         apiAxios.get("/dashboard", {
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -30,10 +32,8 @@ export default function DashBoard() {
         })
             .then((res) => {
                 if (userRole === 1) {
-                    // 강사일 경우 본인의 강의 목록을 가져옴
                     setClassList(res.data.classList || []);
                 } else {
-                    // 수강생일 경우 수강 중인 강의를 가져옴
                     const updatedClasses = (res.data.recentClasses || []).map(classItem => ({
                         ...classItem,
                         thumbnail: classItem.thumbnail
@@ -41,12 +41,11 @@ export default function DashBoard() {
                             : "/img/default_thumbnail.jpg"
                     }));
                     setRecentClasses(updatedClasses);
-                    //퀴즈 진행률
                     setClassQuizProgress(res.data.classQuizProgress || []);
                 }
             })
             .catch((err) => console.log(err));
-    }, [user.token]);
+    }, [user.token, userRole]); // `userRole` 추가하여 경고 해결
 
     // 강의 클릭 시 해당 강의 페이지로 이동
     const handleClassClick = (classNumber) => {
@@ -60,7 +59,7 @@ export default function DashBoard() {
     // 특정 강의의 퀴즈 진행률 가져오기
     const getQuizProgress = useMemo(() => (classNumber) => {
         const progress = classQuizProgress.find((progress) => progress.classNumber === classNumber);
-        return progress ? progress.classProgress : 0; // 진행률 없으면 0%
+        return progress ? progress.classProgress : 0;
     }, [classQuizProgress]);
 
     return (

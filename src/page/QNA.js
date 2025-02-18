@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import apiAxios from "../lib/apiAxios";
@@ -20,11 +20,7 @@ export default function QNA({ setAskWriting }) {
   const decodeToken = user?.token ? jwtDecode(user.token) : null;
   const userNumber = decodeToken ? decodeToken.sub : "";
 
-  useEffect(() => {
-    fetchQnaData();
-  }, [classNumber]);
-
-  const fetchQnaData = async () => {
+  const fetchQnaData = useCallback(async () => {
     try {
       const res = await apiAxios.get(`/class/${classNumber}/qna`);
       setQnaBoard(res.data.qnaBoard);
@@ -32,8 +28,11 @@ export default function QNA({ setAskWriting }) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [classNumber]);
 
+  useEffect(() => {
+    fetchQnaData();
+  }, [fetchQnaData]);
 
   const formatDate = (dateTime) => {
     return dateTime.substring(0, 10);

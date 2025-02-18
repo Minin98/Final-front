@@ -12,10 +12,19 @@ export default function Main() {
   const [latestAsk, setLatestAsk] = useState([]);
   const [classList, setClassList] = useState([]);
   const [classQuizProgress, setClassQuizProgress] = useState([]);
+  const [userRole, setUserRole] = useState(null);
+  const [nickname, setNickname] = useState("guest");
 
   const navigate = useNavigate();
-  let nickname = "guest";
-  let userRole = null;
+
+  useEffect(() => {
+    if (user.token) {
+      const decodeToken = jwtDecode(user.token);
+      setUserRole(decodeToken.grade);
+      const role = decodeToken.grade === 1 ? "강사" : decodeToken.grade === 2 ? "수강생" : "회원";
+      setNickname(`${role} ${decodeToken.nickname}`);
+    }
+  }, [user.token]);
 
   useEffect(() => {
     apiAxios.get("/", {
@@ -36,25 +45,16 @@ export default function Main() {
         const updatedClasses = (res.data.latestClasses || []).map(classItem => ({
           ...classItem,
           thumbnail: classItem.thumbnail
-            ? (classItem.thumbnail.startsWith("data:image") 
-                ? classItem.thumbnail 
-                : `data:image/png;base64,${classItem.thumbnail}`)
-            : "/img/default_thumbnail.jpg" // 기본 썸네일 제공
+            ? (classItem.thumbnail.startsWith("data:image")
+              ? classItem.thumbnail
+              : `data:image/png;base64,${classItem.thumbnail}`)
+            : "/img/default_thumbnail.jpg"
         }));
         setLatestClasses(updatedClasses);
       })
       .catch((err) => console.log(err));
-  }, [user.token]);
+  }, [user.token, userRole]);
 
-  // JWT 토큰 디코딩
-  if (user.token) {
-    const decodeToken = jwtDecode(user.token);
-    userRole = decodeToken.grade;
-    const role = userRole === 1 ? "강사" : userRole === 2 ? "수강생" : "회원";
-    nickname = `${role} ${decodeToken.nickname}`;
-  }
-
-  // 강의 클릭 시 해당 강의 페이지로 이동
   const handleClassClick = (classNumber) => {
     navigate(`/class/${classNumber}`);
   };
@@ -65,7 +65,7 @@ export default function Main() {
 
   const getQuizProgress = (classNumber) => {
     const progress = classQuizProgress.find((progress) => progress.classNumber === classNumber);
-    return progress ? progress.classProgress : 0; // 진행률 없으면 0%
+    return progress ? progress.classProgress : 0;
   };
 
   return (
