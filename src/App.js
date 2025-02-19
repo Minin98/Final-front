@@ -30,6 +30,7 @@ import Rate from "./page/Rate";
 import RateWrite from "./page/RateWrite";
 import VideoPage from './page/VideoPage';
 import CheckUser from "./page/CheckUser";
+import TeacherProfile from "./page/TeacherProfile";
 
 
 function Layout() {
@@ -65,6 +66,7 @@ function Layout() {
         <Route path="/class/:classNumber/rate" element={<Rate />} />
         <Route path="/class/:classNumber/rate/write" element={<RateWrite />} />
         <Route path='/video/:videoNumber' element={<VideoPage />} />
+        <Route path="/teacherProfile/:uno" element={<TeacherProfile />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </>

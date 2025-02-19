@@ -12,49 +12,74 @@ export default function Main() {
   const [latestAsk, setLatestAsk] = useState([]);
   const [classList, setClassList] = useState([]);
   const [classQuizProgress, setClassQuizProgress] = useState([]);
-  const [userRole, setUserRole] = useState(null);
-  const [nickname, setNickname] = useState("guest");
+  const [profileImage, setProfileImage] = useState(null);//이미지 추가!
 
   const navigate = useNavigate();
-
+  let nickname = "guest";
+  let userRole = null;
+  
   useEffect(() => {
-    if (user.token) {
-      const decodeToken = jwtDecode(user.token);
-      setUserRole(decodeToken.grade);
-      const role = decodeToken.grade === 1 ? "강사" : decodeToken.grade === 2 ? "수강생" : "회원";
-      setNickname(`${role} ${decodeToken.nickname}`);
-    }
-  }, [user.token]);
-
-  useEffect(() => {
-    apiAxios.get("/", {
-      headers: {
-        "Authorization": `Bearer ${user.token}`,
-        "Content-Type": "application/json"
-      }
-    })
+    apiAxios.get("/")
       .then((res) => {
-        if (userRole === 1) {
-          setClassList(res.data.classList || []);
-        } else {
-          setRecentClasses(res.data.recentClasses || []);
-          setLatestAsk(res.data.latestAsk || []);
-          setClassQuizProgress(res.data.classQuizProgress || []);
-        }
-
         const updatedClasses = (res.data.latestClasses || []).map(classItem => ({
           ...classItem,
           thumbnail: classItem.thumbnail
             ? (classItem.thumbnail.startsWith("data:image")
               ? classItem.thumbnail
               : `data:image/png;base64,${classItem.thumbnail}`)
-            : "/img/default_thumbnail.jpg"
+            : "/img/default_thumbnail.jpg" // 기본 썸네일 제공
         }));
         setLatestClasses(updatedClasses);
       })
       .catch((err) => console.log(err));
-  }, [user.token, userRole]);
+  }, []); // user.token을 의존성에서 제거
 
+  useEffect(() => {
+    if (user.token) {
+      apiAxios.get("/users", {
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+          "Content-Type": "application/json"
+        }
+      })
+        .then((res) => {
+          if (userRole === 1) {
+            setClassList(res.data.classList || []);
+          } else {
+            setRecentClasses(res.data.recentClasses || []);
+            setLatestAsk(res.data.latestAsk || []);
+            setClassQuizProgress(res.data.classQuizProgress || []);
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [user.token, userRole]); // userRole이 설정된 후 실행되도록 의존성 추가
+
+  useEffect(() => {
+    if (user.token) {
+      // 프로필 이미지 가져오기
+      apiAxios.get("/GetUserProfile", {
+        headers: { "Authorization": `Bearer ${user.token}` }
+      })
+        .then((res) => {
+          if (res.data.profileImg) {
+            console.log("서버 응답:", res.data);
+            setProfileImage(res.data.profileImg);
+          }
+        })
+        .catch((err) => console.log("프로필 이미지 불러오기 실패:", err));
+    }
+  }, [user.token]);
+
+  // JWT 토큰 디코딩
+  if (user.token) {
+    const decodeToken = jwtDecode(user.token);
+    userRole = decodeToken.grade;
+    const role = userRole === 1 ? "강사" : userRole === 2 ? "수강생" : "회원";
+    nickname = `${role} ${decodeToken.nickname}`;
+  }
+
+  // 강의 클릭 시 해당 강의 페이지로 이동
   const handleClassClick = (classNumber) => {
     navigate(`/class/${classNumber}`);
   };
@@ -65,7 +90,7 @@ export default function Main() {
 
   const getQuizProgress = (classNumber) => {
     const progress = classQuizProgress.find((progress) => progress.classNumber === classNumber);
-    return progress ? progress.classProgress : 0;
+    return progress ? progress.classProgress : 0; // 진행률 없으면 0%
   };
 
   return (
@@ -115,7 +140,11 @@ export default function Main() {
           {/* 오른쪽 사이드바 */}
           <div className="sidebar">
             <div className="profile">
-              <div className="profile-pic"></div>
+              <div className="profile-pic">
+                {profileImage && (
+                  <img src={profileImage} alt="Profile" className="profile-image" />
+                )}
+              </div>
               <p className="profile-name">
                 {nickname} 님, <br />
                 어서오세요! 🔥
@@ -134,10 +163,13 @@ export default function Main() {
                         key={classItem.classNumber}
                         onClick={() => handleClassClick(classItem.classNumber)}
                       >
+                        <div className="sidebar-recentClass-details">
                         <p className="sidebar-recentClass-title">{classItem.title}</p>
                         <p className="sidebar-recentClass-date">
                           {formatDate(classItem.createTime)}
                         </p>
+                        </div>
+                        <br/>
                       </div>
                     ))
                   ) : (

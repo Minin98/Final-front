@@ -213,7 +213,6 @@ export default function Chapter({ isEnrolled }) {
             .finally(() => setLoading(false));
     };
 
-
     //퀴즈 모달 오픈
     const openQuizWriteModal = (chapterNumber) => {
         setSelectedChapter(chapterNumber);
@@ -282,7 +281,7 @@ export default function Chapter({ isEnrolled }) {
                                         <p className="lecture-count">{getVideoCount(chapter.chapterNumber)}개의 강의</p>
                                     </div>
 
-                                    {isClassOwner && !isUpdateChapter && !isUpdateVideo && (
+                                    {isClassOwner && !isUpdateChapter && (
                                         <div className="instructor-actions">
                                             <button className="edit-chapter" onClick={() => startUpdateChapter(chapter)}>챕터 수정</button>
                                             <button className="delete-chapter" onClick={() => deleteChapter(chapter)} disabled={loading}>챕터 삭제</button>
@@ -359,7 +358,7 @@ export default function Chapter({ isEnrolled }) {
                     </div>
                 ))}
 
-            {isClassOwner && !isUpdateChapter && !isUpdateVideo && (
+            {isClassOwner && !isUpdateChapter && (
                 <>
                     {!isChapterInsertMode ? (
                         <button className="add-chapter" onClick={toggleChapterInsertMode} disabled={loading}>챕터 추가</button>
@@ -374,7 +373,7 @@ export default function Chapter({ isEnrolled }) {
             )}
 
             {isVideoWriteModalOpen && <VideoWrite onClose={() => setVideoWriteModalOpen(false)} chapterNumber={selectedChapter} classNumber={classNumber} onVideoAdded={fetchClassInfo} />}
-            {isQuizWriteModalOpen && <QuizWrite chapterNumber={selectedChapter} onClose={() => setQuizWriteModalOpen(false)} onQuizSubmit={fetchClassInfo} />}
+            {isQuizWriteModalOpen && <QuizWrite chapterNumber={selectedChapter} onClose={() => setQuizWriteModalOpen(false)} />}
             {isQuizUpdateModalOpen && <QuizUpdate chapterNumber={selectedChapter} quizData={selectedQuiz} onClose={() => setQuizUpdateModalOpen(false)} onQuizUpdated={fetchClassInfo} />}
         </div>
     );

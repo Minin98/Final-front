@@ -10,7 +10,7 @@ export default function VideoWrite({ onClose, chapterNumber, classNumber, onVide
 
     // 유튜브 URL 검증 함수
     const isValidYouTubeUrl = (url) => {
-        const regex = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})(?:&.*)?$/;
+        const regex = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
         return regex.test(url);
     };
 
