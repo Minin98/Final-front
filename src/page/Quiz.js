@@ -19,7 +19,7 @@ export default function Quiz() {
     useEffect(() => {
         if (!chapterNumber) return;
 
-        // 퀴즈 목록과 진행률을 가져오는 요청
+        // 퀴즈 목록을 가져오는 요청
         apiAxios.get(`/quiz/list/${chapterNumber}`)
             .then((res) => {
                 setQuizzes(res.data.quizList);
