@@ -205,6 +205,61 @@
     background-color: #e28411;
 }
 
+/* 영상 수정*/
+.update-video-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 10px;
+}
+
+.update-video-container input {
+    flex: 1;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.2s ease-in-out;
+    height: 40px;
+}
+
+.update-video-container input:focus {
+    border-color: #ff8c00;
+    box-shadow: 0 0 5px rgba(255, 140, 0, 0.3);
+}
+
+/* 버튼 컨테이너 */
+.update-video-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+/* 저장 버튼*/
+.update-video-buttons .save-video-btn, .cancel-video-btn {
+    background-color: white;
+    border: 1px solid #ff8c00;
+    color: #ff8c00;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.update-video-buttons .save-video-btn:hover, .cancel-video-btn:hover{
+    background-color: #ff8c00;
+    color: white;
+}
+
+
+
 .start-quiz {
     margin-left: 150px;
 }

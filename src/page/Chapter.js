@@ -22,8 +22,12 @@ export default function Chapter({ isEnrolled }) {
     const [selectedQuiz] = useState(null);
     const [quizProgress, setQuizProgress] = useState({});
 
-    const [isUpdatingChapter, setIsUpdatingChapter] = useState(null);
+    const [isUpdateChapter, setIsUpdateChapter] = useState(null);
     const [updatedChapterName, setUpdatedChapterName] = useState("");
+
+    const [isUpdateVideo, setIsUpdateVideo] = useState(null);
+    const [updatedVideoTitle, setUpdatedVideoTitle] = useState("");
+    const [updatedVideoUrl, setUpdatedVideoUrl] = useState("");
 
     const user = useSelector((state) => state.users.value);
     const { classNumber } = useParams();
@@ -94,13 +98,13 @@ export default function Chapter({ isEnrolled }) {
 
     // 챕터 수정 시작
     const startUpdateChapter = (chapter) => {
-        setIsUpdatingChapter(chapter.chapterNumber);
+        setIsUpdateChapter(chapter.chapterNumber);
         setUpdatedChapterName(chapter.chapterName);
     };
 
     // 챕터 수정 취소
     const cancelUpdateChapter = () => {
-        setIsUpdatingChapter(null);
+        setIsUpdateChapter(null);
         setUpdatedChapterName("");
     };
 
@@ -113,7 +117,7 @@ export default function Chapter({ isEnrolled }) {
         })
             .then(() => {
                 fetchClassInfo();
-                setIsUpdatingChapter(null);
+                setIsUpdateChapter(null);
             })
             .catch((err) => console.error("챕터 수정 실패:", err));
     };
@@ -141,6 +145,74 @@ export default function Chapter({ isEnrolled }) {
         setSelectedChapter(chapterNumber);
         setVideoWriteModalOpen(true);
     };
+
+    // 영상 수정 시작
+    const startUpdateVideo = (video) => {
+        setIsUpdateVideo(video.videoNumber);
+        setUpdatedVideoTitle(video.videoTitle);
+        setUpdatedVideoUrl("");
+    };
+
+    // 영상 저장
+    const saveVideoUpdate = async (videoNumber) => {
+        if (!updatedVideoTitle.trim()) return;
+
+        try {
+            let newVideoData = null;
+
+            // URL이 변경되면 새 정보 받아오기
+            if (updatedVideoUrl.trim()) {
+                const res = await apiAxios.post("/video/urlChange", { videoUrl: updatedVideoUrl });
+                if (res.data.code !== 1) {
+                    alert("유효하지 않은 유튜브 URL입니다.");
+                    return;
+                }
+                newVideoData = res.data.videoData;
+            }
+
+            // 백엔드에 수정 요청
+            await apiAxios.put(`/video/update/${videoNumber}`, {
+                videoTitle: updatedVideoTitle,
+                videoId: newVideoData ? newVideoData.id : null,
+                videoDuration: newVideoData ? newVideoData.length : null,
+            }, {
+                headers: { "Authorization": `Bearer ${user.token}` }
+            });
+
+            // 최신 데이터 불러오기
+            fetchClassInfo();
+            setIsUpdateVideo(null);
+        } catch (err) {
+            console.error("영상 수정 실패:", err);
+        }
+    };
+
+    // 영상 수정 취소
+    const cancelUpdateVideo = () => {
+        setIsUpdateVideo(null);
+        setUpdatedVideoTitle("");
+        setUpdatedVideoUrl("");
+    };
+
+    // 영상 삭제
+    const deleteVideo = (videoNumber) => {
+        if (!window.confirm("정말로 이 영상을 삭제하시겠습니까?")) return;
+
+        setLoading(true);
+        apiAxios.delete(`/video/delete/${videoNumber}`, {
+            headers: { "Authorization": `Bearer ${user.token}` }
+        })
+            .then(() => {
+                alert("영상이 삭제되었습니다.");
+                fetchClassInfo();
+            })
+            .catch((err) => {
+                console.error("영상 삭제 실패:", err);
+                alert("영상 삭제에 실패했습니다.");
+            })
+            .finally(() => setLoading(false));
+    };
+
 
     //퀴즈 모달 오픈
     const openQuizWriteModal = (chapterNumber) => {
@@ -184,7 +256,7 @@ export default function Chapter({ isEnrolled }) {
         fetchClassInfo();
         fetchQuizProgress(); // 퀴즈 진행률 조회 추가
     }, [fetchClassInfo, fetchQuizProgress]);
-    
+
     return (
         <div className="chapter-list">
             {loading && <p className="loading-text">로딩 중...</p>}
@@ -193,7 +265,7 @@ export default function Chapter({ isEnrolled }) {
                 chapters.map((chapter) => (
                     <div className="chapter" key={chapter.chapterNumber}>
                         <div className="chapter-header">
-                            {isUpdatingChapter === chapter.chapterNumber ? (
+                            {isUpdateChapter === chapter.chapterNumber ? (
                                 <div className="update-chapter-container">
                                     <input
                                         type="text"
@@ -210,7 +282,7 @@ export default function Chapter({ isEnrolled }) {
                                         <p className="lecture-count">{getVideoCount(chapter.chapterNumber)}개의 강의</p>
                                     </div>
 
-                                    {isClassOwner && !isUpdatingChapter && (
+                                    {isClassOwner && !isUpdateChapter && !isUpdateVideo && (
                                         <div className="instructor-actions">
                                             <button className="edit-chapter" onClick={() => startUpdateChapter(chapter)}>챕터 수정</button>
                                             <button className="delete-chapter" onClick={() => deleteChapter(chapter)} disabled={loading}>챕터 삭제</button>
@@ -229,7 +301,7 @@ export default function Chapter({ isEnrolled }) {
                                         chapter.quizCount > 0 && (
                                             <button
                                                 className="start-quiz"
-                                                onClick={() => navigate(`/quiz/${classNumber}/${chapter.chapterNumber}`)}
+                                                onClick={() => navigate(`/quiz/${chapter.chapterNumber}`)}
                                                 disabled={quizProgress.find(progress => progress.chapterNumber === chapter.chapterNumber)?.chapterProgress === 100}
                                             >
                                                 {quizProgress.find(progress => progress.chapterNumber === chapter.chapterNumber)?.chapterProgress === 100 ? "풀이 완료" : "퀴즈 풀기"}
@@ -243,27 +315,51 @@ export default function Chapter({ isEnrolled }) {
                         <div className="video-list">
                             {videos[chapter.chapterNumber]?.map((video) => (
                                 <div className="video-item" key={video.videoNumber}>
-                                    <span className="video-title" title={video.videoTitle}>{video.videoTitle || "영상 제목 없음"}</span>
-                                    <span className="video-duration">{formatDuration(video.videoDuration)}</span>
-
-                                    {isClassOwner && !isUpdatingChapter ? (
-                                        <div className="instructor-video-controls">
-                                            <button className="edit-video" disabled={loading}>수정</button>
-                                            <button className="delete-video" disabled={loading}>삭제</button>
+                                    {/* 수정 모드 */}
+                                    {isUpdateVideo === video.videoNumber ? (
+                                        <div className="update-video-container">
+                                            <input
+                                                type="text"
+                                                value={updatedVideoTitle}
+                                                onChange={(e) => setUpdatedVideoTitle(e.target.value)}
+                                                placeholder="새 영상 제목 입력"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={updatedVideoUrl}
+                                                onChange={(e) => setUpdatedVideoUrl(e.target.value)}
+                                                placeholder="새 유튜브 URL 입력"
+                                            />
+                                            <div className="update-video-buttons">
+                                                <button className="save-video-btn" onClick={() => saveVideoUpdate(video.videoNumber)}>저장</button>
+                                                <button className="cancel-video-btn" onClick={cancelUpdateVideo}>취소</button>
+                                            </div>
                                         </div>
-                                    ) : (grade === 2 && isEnrolled) ? (
-                                        <button className="watch-video" onClick={() => handleWatchVideo(video.videoNumber)}>영상 보기</button>
-                                    ) : null}
+                                    ) : (
+                                        <>
+                                            <span className="video-title" title={video.videoTitle}>{video.videoTitle || "영상 제목 없음"}</span>
+                                            <span className="video-duration">{formatDuration(video.videoDuration)}</span>
+
+                                            {isClassOwner && !isUpdateChapter ? (
+                                                <div className="instructor-video-controls">
+                                                    <button className="edit-video" onClick={() => startUpdateVideo(video)}>수정</button>
+                                                    <button className="delete-video" onClick={() => deleteVideo(video.videoNumber)}>삭제</button>
+                                                </div>
+                                            ) : (grade === 2 && isEnrolled) ? (
+                                                <button className="watch-video" onClick={() => handleWatchVideo(video.videoNumber)}>영상 보기</button>
+                                            ) : null}
+                                        </>
+                                    )}
                                 </div>
                             ))}
-                            {isClassOwner && !isUpdatingChapter && (
+                            {isClassOwner && !isUpdateChapter && !isUpdateVideo && (
                                 <button className="add-video" onClick={() => openVideoWriteModal(chapter.chapterNumber)} disabled={loading}>동영상 추가</button>
                             )}
                         </div>
                     </div>
                 ))}
 
-            {isClassOwner && !isUpdatingChapter && (
+            {isClassOwner && !isUpdateChapter && !isUpdateVideo && (
                 <>
                     {!isChapterInsertMode ? (
                         <button className="add-chapter" onClick={toggleChapterInsertMode} disabled={loading}>챕터 추가</button>
@@ -278,7 +374,7 @@ export default function Chapter({ isEnrolled }) {
             )}
 
             {isVideoWriteModalOpen && <VideoWrite onClose={() => setVideoWriteModalOpen(false)} chapterNumber={selectedChapter} classNumber={classNumber} onVideoAdded={fetchClassInfo} />}
-            {isQuizWriteModalOpen && <QuizWrite chapterNumber={selectedChapter} onClose={() => setQuizWriteModalOpen(false)} />}
+            {isQuizWriteModalOpen && <QuizWrite chapterNumber={selectedChapter} onClose={() => setQuizWriteModalOpen(false)} onQuizSubmit={fetchClassInfo} />}
             {isQuizUpdateModalOpen && <QuizUpdate chapterNumber={selectedChapter} quizData={selectedQuiz} onClose={() => setQuizUpdateModalOpen(false)} onQuizUpdated={fetchClassInfo} />}
         </div>
     );
