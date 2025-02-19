@@ -1,4 +1,4 @@
-import { React, useEffect, useState, useRef, useCallback } from "react";
+import { React, useEffect, useState, useRef } from "react";
 import "../css/MypageInfo.css";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -30,8 +30,8 @@ export default function MypageInfo() {
       phone: false
     }
   );
-  
-  const fetchUserInfo = useCallback(() => {
+
+  useEffect(() => {
     if (!token) {
       console.error("토큰이 없습니다.");
       return;
@@ -40,40 +40,31 @@ export default function MypageInfo() {
     const decodedToken = jwtDecode(token);
     setType(decodedToken.type);
 
+    // 사용자 정보 가져오기
     axios
-      .post("http://localhost:9999/MypageInfo", {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      .post(
+        "http://localhost:9999/MypageInfo",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       .then((res) => {
         setUserInfo(res.data);
         setOriginInfo(res.data);
       })
       .catch((err) => console.error("요청 에러:", err));
-  }, [token]);
 
-  const fetchProfileImage = useCallback(() => {
-    if (!token) return;
-
+    // 프로필 이미지 가져오기 (Base64 대신 URL 반환)
     axios
-      .post("http://localhost:9999/ProfileImage", {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      .get(
+        "http://localhost:9999/GetUserProfile",
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       .then((res) => {
         console.log("서버 응답:", res.data);
-        if (res.data.profileImageUrl && res.data.profileImageUrl !== "non") {
-          setProfileImage(`http://localhost:9999${res.data.profileImageUrl}`);
-        } else {
-          setProfileImage(defaultImg);
-        }
+        setProfileImage(res.data.profileImg);
       })
       .catch((err) => console.error("요청 에러:", err));
-  }, [token]);
-
-  useEffect(() => {
-    fetchUserInfo();
-    fetchProfileImage();
-  }, [token, fetchUserInfo, fetchProfileImage]);
-
+  }, [dataRoad]);
 
   // 파일 선택 시 미리보기 표시
   const handleFileChange = (event) => {
@@ -111,9 +102,12 @@ export default function MypageInfo() {
 
       console.log("업로드 성공:", res.data);
 
-      if (res.data.profilePath) {
-        setProfileImage(`http://localhost:9999${res.data.profilePath}`);
-      }
+      if (res.data.profileImg && res.data.profileImg !== "non") {
+        setProfileImage(res.data.profileImg);
+    } else {
+        setProfileImage("/default-profile.png"); // 기본 이미지 설정
+    }
+    
 
       setIsUploadEnabled(false);
       alert("프로필 사진이 변경되었습니다.");
@@ -127,7 +121,7 @@ export default function MypageInfo() {
   const handleFileRemove = async () => {
     axios.post(
       "http://localhost:9999/UpdateUserProfile",
-      { file: null },
+      new FormData(),
       {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -137,14 +131,12 @@ export default function MypageInfo() {
     );
 
     axios
-      .post(
-        "http://localhost:9999/ProfileImage",
-        {},
+      .get(
+        "http://localhost:9999/GetUserProfile",
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then((res) => {
         console.log("서버 응답:", res.data);
-        setProfileImage(res.data.profileImageBase64);
       })
       .catch((err) => console.error("요청 에러:", err));
 
@@ -214,6 +206,12 @@ export default function MypageInfo() {
     }));
   };
 
+  const tokenlenth = () => {
+    const decodedToken = jwtDecode(token);
+    console.log("decodedToken : ", decodedToken);
+    console.log(" token length : ",token.length);
+  }
+
   return (
     <div className="mypage-container">
       <div className="profile-section">
@@ -222,7 +220,6 @@ export default function MypageInfo() {
             src={profileImage || defaultImg}
             alt="프로필 이미지"
             className="profile-image"
-            style={{ cursor: "pointer" }}
           />
         </label>
 
@@ -242,7 +239,7 @@ export default function MypageInfo() {
             className="profile-button"
             onClick={handleUpload}
             disabled={!isUploadEnabled}>
-            {isUploadEnabled ? "프로필 사진 변경" : "이미지 클릭시 파일 선택"}
+            {isUploadEnabled ? "프로필 사진 변경" : "프로필 사진 추가"}
           </button>
           <button className="removeprofile-button" onClick={handleFileRemove}>
             프로필 삭제하기
@@ -272,7 +269,7 @@ export default function MypageInfo() {
                     value={userInfo[key]}
                   />
                   <div className="btn-block">
-                    <button className={`${key}-update`} onClick={(e) => toggleEditMode(e, key)} style={{ margin: "0px 10px 0px 0px" }}>취소</button>
+                    <button className={`${key}-update`} onClick={(e) => toggleEditMode(e, key)} >취소</button>
                     <button className={`${key}-update`} onClick={updatehandle}>저장</button>
                   </div>
                 </div>

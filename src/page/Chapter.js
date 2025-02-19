@@ -301,7 +301,7 @@ export default function Chapter({ isEnrolled }) {
                                         chapter.quizCount > 0 && (
                                             <button
                                                 className="start-quiz"
-                                                onClick={() => navigate(`/quiz/${chapter.chapterNumber}`)}
+                                                onClick={() => navigate(`/quiz/${classNumber}/${chapter.chapterNumber}`)}
                                                 disabled={quizProgress.find(progress => progress.chapterNumber === chapter.chapterNumber)?.chapterProgress === 100}
                                             >
                                                 {quizProgress.find(progress => progress.chapterNumber === chapter.chapterNumber)?.chapterProgress === 100 ? "풀이 완료" : "퀴즈 풀기"}

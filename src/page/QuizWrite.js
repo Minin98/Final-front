@@ -44,8 +44,8 @@ export default function QuizWrite({ chapterNumber, onClose, onQuizSubmit }) {
         apiAxios.post("/quiz/insert", data)
             .then((res) => {
                 alert(res.data.msg);
-                onQuizSubmit();  // 퀴즈 등록 후 클래스 정보 갱신
                 onClose();
+                onQuizSubmit();  // 퀴즈 등록 후 클래스 정보 갱신
             }).catch((error) => console.log(error));
     };
 

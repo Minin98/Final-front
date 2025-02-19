@@ -111,10 +111,6 @@
   color: #333;
 }
 
-.comments-section {
-  
-}
-
 .comment-card {
   background: #FFFFFF;
   border-top: 1px solid #ddd; 
@@ -326,4 +322,12 @@
   background-repeat: no-repeat;
 
   margin-left: 10px;
+}
+
+.not-enrolled-qna {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.8;
+  margin: 20px auto;
 }

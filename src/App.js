@@ -29,6 +29,7 @@ import UpdatePassword from "./page/UpdatePassword";
 import Rate from "./page/Rate";
 import RateWrite from "./page/RateWrite";
 import VideoPage from './page/VideoPage';
+import CheckUser from "./page/CheckUser";
 
 
 function Layout() {
@@ -48,6 +49,8 @@ function Layout() {
         <Route path="/classList" element={<ClassList />} />
         <Route path="/mypage" element={<MypageInfo />} />
         <Route path="/mypage/updateinfo" element={<UserUpdate />} />
+        
+        <Route path='/checkUser' element={<CheckUser />} />
         <Route path="/class/:classNumber" element={<ClassPage />} />
         <Route path="/class/:classNumber/notice" element={<Notice />} />
         <Route path="/class/:classNumber/qna" element={<QNA />} />
@@ -55,7 +58,7 @@ function Layout() {
         <Route path="/email" element={<Mail />} />
         <Route path="/find/id" element={<FindIdPage />} />
         <Route path="/find/pwd" element={<FindPwdPage />} />
-        <Route path="/quiz/:chapterNumber" element={<Quiz />} />
+        <Route path="/quiz/:classNumber/:chapterNumber" element={<Quiz />} />
         <Route path="/deleteUser" element={<DeleteUser />} />
         <Route path="/dashboard" element={<DashBoard />} />
         <Route path="/updatePassword" element={<UpdatePassword />} />

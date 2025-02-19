@@ -107,3 +107,28 @@
   cursor: pointer;
   margin-top: 15px;
 }
+
+.class-rate {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.class-instructor-info {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.class-instructor-link {
+  font-size: 14px;
+  color: #000;
+  text-decoration: 2px underline solid #000;
+}
+
+.class-instructor-link:hover {
+  color: #ff8c00;
+  text-decoration: 2px underline solid #ff8c00;
+}

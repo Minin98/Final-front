@@ -1,26 +1,53 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import apiAxios from "../lib/apiAxios";
 import { jwtDecode } from "jwt-decode";
 import "../css/QNA.css";
 
-export default function QNA({ setAskWriting }) {
+export default function QNA({ setAskWriting, isClassOwner }) {
   const [qnaBoard, setQnaBoard] = useState([]);
   const [comments, setComments] = useState({});
   const [addComment, setAddComment] = useState({});
+
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   const [editingAsk, setEditingAsk] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
   const { classNumber } = useParams();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.users.value);
 
   const decodeToken = user?.token ? jwtDecode(user.token) : null;
   const userNumber = decodeToken ? decodeToken.sub : "";
 
-  const fetchQnaData = useCallback(async () => {
+  const checkEnrollmentStatus = useCallback(() => {
+    apiAxios
+      .get(`/usersProgress/check?classNumber=${classNumber}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+      .then((res) => {
+        setIsEnrolled(res.data.isEnrolled);
+      })
+      .catch((err) => console.error("수강 여부 확인 실패", err));
+  }, [classNumber, user.token]);
+
+  useEffect(() => {
+    if (!classNumber) {
+      console.error("classNumber가 존재하지 않습니다.");
+      navigate("/");
+      return;
+    }
+    checkEnrollmentStatus();
+  }, [classNumber, checkEnrollmentStatus, navigate]);
+
+  useEffect(() => {
+    fetchQnaData();
+  }, [classNumber]);
+
+  const fetchQnaData = async () => {
     try {
       const res = await apiAxios.get(`/class/${classNumber}/qna`);
       setQnaBoard(res.data.qnaBoard);
@@ -28,11 +55,8 @@ export default function QNA({ setAskWriting }) {
     } catch (err) {
       console.error(err);
     }
-  }, [classNumber]);
+  };
 
-  useEffect(() => {
-    fetchQnaData();
-  }, [fetchQnaData]);
 
   const formatDate = (dateTime) => {
     return dateTime.substring(0, 10);
@@ -179,109 +203,115 @@ export default function QNA({ setAskWriting }) {
 
   return (
     <div className="qna-board">
-      <h2 className="qna-board-title">
-        궁금한 점을 자유롭게 질문하고,
-        <br />
-        다른 사람들의 질문에 답변을 통해 지식을 나눠보세요.
-      </h2>
-      <button className="qna-write-button" onClick={() => setAskWriting(true)}>질문하기</button>
+      {(isEnrolled || isClassOwner) ?  (
+        <>
+          <h2 className="qna-board-title">
+            궁금한 점을 자유롭게 질문하고,
+            <br />
+            다른 사람들의 질문에 답변을 통해 지식을 나눠보세요.
+          </h2>
+          <button className="qna-write-button" onClick={() => setAskWriting(true)}>질문하기</button>
 
-      {qnaBoard.length > 0 ? (
-        qnaBoard.map((qnaBoard, index) => (
-          <div key={index} className="qna-card">
-            <span className="qna-chapter">{qnaBoard.chapterName}</span>
-            
-            {userNumber === qnaBoard.uno && (
-                <div className="qna-actions">
-                  <button className="qna-edit-btn" onClick={() => startEditingAsk(qnaBoard)}></button>
-                  <button className="qna-delete-btn" onClick={() => handleDeleteAsk(qnaBoard.askNumber)}></button>
-                </div>
-              )}
-            {editingAsk === qnaBoard.askNumber ? (
-              <div className="edit-ask-container">
-                <label>질문 제목</label>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="제목을 입력하세요"
-                />
-                <label>질문 내용</label>
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  placeholder="내용을 입력하세요"
-                />
-                <div className="edit-ask-actions">
-                  <button onClick={() => handleEditAskSubmit(qnaBoard.askNumber)}>저장</button>
-                  <button onClick={cancelEditingAsk}>취소</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="qna-title">{qnaBoard.askTitle}</p>
-                <p className="qna-content">{qnaBoard.askContent}</p>
-              </>
-            )}
-            
+          {qnaBoard.length > 0 ? (
+            qnaBoard.map((qnaBoard, index) => (
+              <div key={index} className="qna-card">
+                <span className="qna-chapter">{qnaBoard.chapterName}</span>
 
-            <div className="qna-writer">
-              <img
-                src="/img/user.png"
-                alt="User Icon"
-                className="qna-writer-icon"
-              />
-              <p className="qna-writer-name">작성자 : {qnaBoard.name}</p>
-              <span className="qna-date">{formatDate(qnaBoard.askCreateTime)}</span>
-              <div className="qna-comment-count-container">
-                <img src="/img/comment.png" alt="Comment Icon" />
-                <span className="qna-comment-count">{comments[qnaBoard.askNumber] ? comments[qnaBoard.askNumber].length : 0}</span>
-              </div>
-            </div>
-            <div className="comments-section">
-              {comments[qnaBoard.askNumber] && comments[qnaBoard.askNumber].length > 0 ? (
-                comments[qnaBoard.askNumber].map((comment, idx) => (
-                  <div key={idx} className="comment-card">
-                    <div className="comment-header">
-                      <div className="comment-user-icon">
-                        <img src="/img/user.png" alt="User Icon" />
-                        <span className="comment-user-name">{comment.name}</span>
-                      </div>
-                      <span className="comment-date">
-                        {formatDate(comment.commentCreateTime)}
-                      </span>
-                      {userNumber === comment.uno && (
-                      <button className="comment-delete-btn" onClick={() => handleDeleteComment(comment.commentNumber, qnaBoard.askNumber)}></button>
-                    )}
-                    </div>
-                    <p className="comment-content">{comment.commentContent}</p>
+                {userNumber === qnaBoard.uno && (
+                  <div className="qna-actions">
+                    <button className="qna-edit-btn" onClick={() => startEditingAsk(qnaBoard)}></button>
+                    <button className="qna-delete-btn" onClick={() => handleDeleteAsk(qnaBoard.askNumber)}></button>
                   </div>
-                ))
-              ) : (
-                <p className="no-comments">등록된 댓글이 없습니다.</p>
-              )}
-              {addComment[qnaBoard.askNumber] !== undefined ? (
-                <div className="add-comment-container">
-                  <input
-                    type="text"
-                    placeholder="답변을 입력해주세요"
-                    value={addComment[qnaBoard.askNumber]}
-                    onChange={(e) => handleAddCommentChange(qnaBoard.askNumber, e.target.value)}
+                )}
+                {editingAsk === qnaBoard.askNumber ? (
+                  <div className="edit-ask-container">
+                    <label>질문 제목</label>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="제목을 입력하세요"
+                    />
+                    <label>질문 내용</label>
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      placeholder="내용을 입력하세요"
+                    />
+                    <div className="edit-ask-actions">
+                      <button onClick={() => handleEditAskSubmit(qnaBoard.askNumber)}>저장</button>
+                      <button onClick={cancelEditingAsk}>취소</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="qna-title">{qnaBoard.askTitle}</p>
+                    <p className="qna-content">{qnaBoard.askContent}</p>
+                  </>
+                )}
+
+
+                <div className="qna-writer">
+                  <img
+                    src="/img/user.png"
+                    alt="User Icon"
+                    className="qna-writer-icon"
                   />
-                  <button className="add-comment-submit-button" onClick={() => handleAddCommentSubmit(qnaBoard.askNumber)}>
-                    <img src="/img/add-comment-icon.png" alt="Submit Comment" />
-                  </button>
+                  <p className="qna-writer-name">작성자 : {qnaBoard.name}</p>
+                  <span className="qna-date">{formatDate(qnaBoard.askCreateTime)}</span>
+                  <div className="qna-comment-count-container">
+                    <img src="/img/comment.png" alt="Comment Icon" />
+                    <span className="qna-comment-count">{comments[qnaBoard.askNumber] ? comments[qnaBoard.askNumber].length : 0}</span>
+                  </div>
                 </div>
-              ) : (
-                <div className="add-comment-button-container">
-                  <button className="add-comment-button" onClick={() => toggleAddCommentInput(qnaBoard.askNumber)}>답변 추가</button>
+                <div className="comments-section">
+                  {comments[qnaBoard.askNumber] && comments[qnaBoard.askNumber].length > 0 ? (
+                    comments[qnaBoard.askNumber].map((comment, idx) => (
+                      <div key={idx} className="comment-card">
+                        <div className="comment-header">
+                          <div className="comment-user-icon">
+                            <img src="/img/user.png" alt="User Icon" />
+                            <span className="comment-user-name">{comment.name}</span>
+                          </div>
+                          <span className="comment-date">
+                            {formatDate(comment.commentCreateTime)}
+                          </span>
+                          {userNumber === comment.uno && (
+                            <button className="comment-delete-btn" onClick={() => handleDeleteComment(comment.commentNumber, qnaBoard.askNumber)}></button>
+                          )}
+                        </div>
+                        <p className="comment-content">{comment.commentContent}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-comments">등록된 댓글이 없습니다.</p>
+                  )}
+                  {addComment[qnaBoard.askNumber] !== undefined ? (
+                    <div className="add-comment-container">
+                      <input
+                        type="text"
+                        placeholder="답변을 입력해주세요"
+                        value={addComment[qnaBoard.askNumber]}
+                        onChange={(e) => handleAddCommentChange(qnaBoard.askNumber, e.target.value)}
+                      />
+                      <button className="add-comment-submit-button" onClick={() => handleAddCommentSubmit(qnaBoard.askNumber)}>
+                        <img src="/img/add-comment-icon.png" alt="Submit Comment" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="add-comment-button-container">
+                      <button className="add-comment-button" onClick={() => toggleAddCommentInput(qnaBoard.askNumber)}>답변 추가</button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        ))
+              </div>
+            ))
+          ) : (
+            <p className="no-qna-message">등록된 QnA가 없습니다.</p>
+          )}
+        </>
       ) : (
-        <p className="no-qna-message">등록된 QnA가 없습니다.</p>
+        <h2 className="not-enrolled-qna">수강 중인 강의가 아닙니다.<br />수강 신청을 하신 후 질문을 남겨보세요!</h2>
       )}
 
     </div>

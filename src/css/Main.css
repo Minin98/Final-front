@@ -179,7 +179,11 @@
   height: 80px;
   margin: 0 auto 10px;
 }
-
+.profile-pic .profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .main-container > .sidebar > .profile > .profile-name {
   font-size: 18px;
   font-weight: bold;
@@ -236,6 +240,11 @@
   font-size: 14px;
   font-weight: bold;
   margin: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px; /* 적절한 너비 조정 */
+  display: block;
 }
 
 
