@@ -4,7 +4,7 @@ import "../css/QuizWrite.css";
 
 export default function QuizEdit({ chapterNumber, onClose, onQuizUpdated }) {
     const [quizzes, setQuizzes] = useState([]);
-    console.log(chapterNumber);
+
     // 초기 퀴즈 정보 불러오기
     useEffect(() => {
         apiAxios.get(`/quiz/list/${chapterNumber}`)
@@ -21,9 +21,13 @@ export default function QuizEdit({ chapterNumber, onClose, onQuizUpdated }) {
         setQuizzes(updatedQuizzes);
     };
 
+    // 정답 선택 (O/X 버튼)
+    const handleAnswerSelect = (index, answer) => {
+        handleChange(index, "answer", answer);
+    };
+
     // 퀴즈 수정 제출
     const handleSubmit = async () => {
-        // 유효성 검사: 모든 필드를 입력했는지 확인
         for (let quiz of quizzes) {
             if (!quiz.question.trim() || !quiz.answer.trim() || !quiz.description.trim()) {
                 alert("빈칸을 입력해주세요.");
@@ -40,26 +44,29 @@ export default function QuizEdit({ chapterNumber, onClose, onQuizUpdated }) {
                 description: quiz.description
             }))
         };
-        console.log(data);
+
         apiAxios.post("/quiz/update", data)
             .then((res) => {
                 alert(res.data.msg);
                 onQuizUpdated();
-                onClose();  // 수정 후 모달 닫기
+                onClose();
             })
             .catch((error) => {
                 console.error(error);
                 alert("퀴즈 수정에 실패했습니다.");
             });
     };
+
     // 퀴즈 삭제
     const handleDeleteQuiz = (index) => {
         setQuizzes(quizzes.filter((_, i) => i !== index));
     };
+
     // 새 퀴즈 추가
     const handleAddQuiz = () => {
         setQuizzes([...quizzes, { question: "", answer: "", description: "" }]);
     };
+
     return (
         <div className="quiz-write-modal">
             <div className="quiz-write-container">
@@ -68,7 +75,10 @@ export default function QuizEdit({ chapterNumber, onClose, onQuizUpdated }) {
                     {quizzes.map((quiz, index) => (
                         <div key={quiz.quizNumber} className="quiz-item">
                             <hr />
-                            <span className="quiz-number">{index + 1}번 문제 <button className="delete-quiz-btn" onClick={() => handleDeleteQuiz(index)}>x</button></span>
+                            <span className="quiz-number">
+                                {index + 1}번 문제
+                                <button className="delete-quiz-btn" onClick={() => handleDeleteQuiz(index)}>x</button>
+                            </span>
                             <textarea
                                 className="quiz-question"
                                 placeholder="퀴즈 질문을 입력하세요"
@@ -83,12 +93,20 @@ export default function QuizEdit({ chapterNumber, onClose, onQuizUpdated }) {
                                 onChange={(e) => handleChange(index, "description", e.target.value)}
                                 rows="3"
                             />
-                            <input
-                                type="text"
-                                placeholder="정답을 입력하세요"
-                                value={quiz.answer}
-                                onChange={(e) => handleChange(index, "answer", e.target.value)}
-                            />
+                            <div className="quiz-answer-buttons">
+                                <button
+                                    className={`answer-btn ${quiz.answer === "O" ? "selected" : ""}`}
+                                    onClick={() => handleAnswerSelect(index, "O")}
+                                >
+                                    O
+                                </button>
+                                <button
+                                    className={`answer-btn ${quiz.answer === "X" ? "selected" : ""}`}
+                                    onClick={() => handleAnswerSelect(index, "X")}
+                                >
+                                    X
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

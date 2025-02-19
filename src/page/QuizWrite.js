@@ -22,11 +22,16 @@ export default function QuizWrite({ chapterNumber, onClose, onQuizSubmit }) {
         setQuizzes(quizzes.filter((_, i) => i !== index));
     };
 
+    // 정답 선택 (O/X)
+    const handleAnswerSelect = (index, answer) => {
+        handleChange(index, "answer", answer);
+    };
+
     // "등록" 버튼 클릭 시 실행
     const handleSubmit = async () => {
         for (let quiz of quizzes) {
             if (!quiz.question.trim() || !quiz.answer.trim() || !quiz.description.trim()) {
-                alert("모든 필드를 입력해주세요.");
+                alert("모든 빈칸을 입력해주세요.(정답도 선택해주세요.)");
                 return;
             }
         }
@@ -72,12 +77,20 @@ export default function QuizWrite({ chapterNumber, onClose, onQuizSubmit }) {
                                 onChange={(e) => handleChange(index, "description", e.target.value)}
                                 rows="3"
                             />
-                            <input
-                                type="text"
-                                placeholder="정답을 입력하세요"
-                                value={quiz.answer}
-                                onChange={(e) => handleChange(index, "answer", e.target.value)}
-                            />
+                            <div className="quiz-answer-buttons">
+                                <button
+                                    className={`answer-btn ${quiz.answer === "O" ? "selected" : ""}`}
+                                    onClick={() => handleAnswerSelect(index, "O")}
+                                >
+                                    O
+                                </button>
+                                <button
+                                    className={`answer-btn ${quiz.answer === "X" ? "selected" : ""}`}
+                                    onClick={() => handleAnswerSelect(index, "X")}
+                                >
+                                    X
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

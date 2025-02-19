@@ -93,9 +93,14 @@
   padding-bottom: 10px;
 }
 .delete-quiz-btn{
+  width: 20px;
+  height: 20px;
   background-color: #ffffff;
   border: 1px solid #ff8c00;
   color: #ff8c00;
+  text-align: center;
+  position: relative;
+  right: -295px;
   
 }
 .quiz-item hr {
@@ -106,4 +111,41 @@
 .quiz-scroll-container {
   max-height: 400px;
   overflow-y: auto;
+}
+
+.quiz-answer-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.answer-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  background-color: #FFF8E8;
+  border: 2px solid orange;
+  color: orange;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.answer-btn.selected {
+  background-color: orange;
+  color: white;
+}
+
+.answer-btn:hover {
+  background-color: orange;
+  color: white;
+}
+
+.quiz-answer-buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 10px;
 }
