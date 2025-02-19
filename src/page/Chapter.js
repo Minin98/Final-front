@@ -281,7 +281,7 @@ export default function Chapter({ isEnrolled }) {
                                         <p className="lecture-count">{getVideoCount(chapter.chapterNumber)}개의 강의</p>
                                     </div>
 
-                                    {isClassOwner && !isUpdateChapter && (
+                                    {isClassOwner && !isUpdateChapter && !isUpdateVideo && (
                                         <div className="instructor-actions">
                                             <button className="edit-chapter" onClick={() => startUpdateChapter(chapter)}>챕터 수정</button>
                                             <button className="delete-chapter" onClick={() => deleteChapter(chapter)} disabled={loading}>챕터 삭제</button>
@@ -339,7 +339,7 @@ export default function Chapter({ isEnrolled }) {
                                             <span className="video-title" title={video.videoTitle}>{video.videoTitle || "영상 제목 없음"}</span>
                                             <span className="video-duration">{formatDuration(video.videoDuration)}</span>
 
-                                            {isClassOwner && !isUpdateChapter ? (
+                                            {isClassOwner && !isUpdateChapter && !isUpdateVideo ? (
                                                 <div className="instructor-video-controls">
                                                     <button className="edit-video" onClick={() => startUpdateVideo(video)}>수정</button>
                                                     <button className="delete-video" onClick={() => deleteVideo(video.videoNumber)}>삭제</button>
@@ -358,9 +358,9 @@ export default function Chapter({ isEnrolled }) {
                     </div>
                 ))}
 
-            {isClassOwner && !isUpdateChapter && (
+            {isClassOwner && !isUpdateChapter && !isUpdateVideo &&  (
                 <>
-                    {!isChapterInsertMode ? (
+                    {!isChapterInsertMode && !isUpdateVideo ? (
                         <button className="add-chapter" onClick={toggleChapterInsertMode} disabled={loading}>챕터 추가</button>
                     ) : (
                         <div className="add-chapter-input">
