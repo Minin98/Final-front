@@ -90,7 +90,7 @@ input {
 }
 
 /* 버튼 컨테이너 */
-.btn-container {
+.register-btn-container {
     width: 100%;
     margin-bottom: 20px;
     display: flex;
@@ -105,8 +105,8 @@ input {
 }
 
 /* 회원가입 버튼 */
-.submit-btn,
-.cancel-btn {
+.register-btn-container .submit-btn,
+.register-btn-container .cancel-btn {
     width: 450px;
     padding: 12px;
     font-size: 1rem;

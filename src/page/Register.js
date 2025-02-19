@@ -263,7 +263,7 @@ export default function Register() {
             </div>
           </div>
           <p className="required-note">* 표시는 필수 입력입니다.</p>
-          <div className="btn-container">
+          <div className="register-btn-container">
             <button type="button" className="submit-btn" onClick={register}>
               회원가입
             </button>
