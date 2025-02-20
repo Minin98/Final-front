@@ -3,23 +3,26 @@ import { useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import apiAxios from "../lib/apiAxios";
 import "../css/Chat.css";
+import { useNavigate } from "react-router-dom";
 
 function Chat({ classNumber }) {
   const ws = useRef(null);
   const user = useSelector((state) => state.users.value);
   const chatContainerRef = useRef(null); // 👈 채팅창 스크롤 조절을 위한 ref
-
+  const navigate = useNavigate();
   // 수강 여부 / 강사 여부
   const [isEnrolled, setIsEnrolled] = useState(null);
   const [isInstructor, setIsInstructor] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
-
   // -------------------------------
   // (1) 두 API를 Promise.all로 동시에 호출
   // -------------------------------
   useEffect(() => {
-    if (!user?.token) {navigator("/login"); return;}
+    if (!user?.token) {
+      navigate("/login");
+      return;
+    }
 
     const fetchData = async () => {
       try {
@@ -35,7 +38,7 @@ function Chat({ classNumber }) {
         setIsEnrolled(progressRes.data.isEnrolled);
         const instructorUno =
           classRes.data.class?.uno || classRes.data.uno;
-        const myUno = jwtDecode(user.token).sub;
+        const myUno = user?.token ? jwtDecode(user.token).sub : null;
         setIsInstructor(String(instructorUno) === String(myUno));
       } catch (error) {
         console.error("API 호출 중 오류:", error);
@@ -57,7 +60,11 @@ function Chat({ classNumber }) {
       return;
     }
 
-    const myUno = jwtDecode(user.token).sub;
+    const myUno = user?.token ? jwtDecode(user.token).sub : null;
+    if (!myUno) {
+      console.error("🚨 Invalid Token: WebSocket 연결 중단");
+      return;
+    }
     const SOCKET_URL = `ws://localhost:9999/chat?uno=${myUno}&classNumber=${classNumber}`;
     ws.current = new WebSocket(SOCKET_URL);
 
@@ -70,7 +77,7 @@ function Chat({ classNumber }) {
       try {
         const parsedMessage = JSON.parse(event.data); // JSON 문자열을 객체로 변환
         console.log("📩 받은 메시지(파싱된 데이터):", parsedMessage);
-    
+
         setMessages((prev) => [...prev, parsedMessage]); // 객체를 배열에 추가
       } catch (error) {
         console.error("JSON 파싱 오류:", error);
@@ -113,7 +120,7 @@ function Chat({ classNumber }) {
     }
   };
 
-  
+
 
   return (
     <div className="web-socket-container">
