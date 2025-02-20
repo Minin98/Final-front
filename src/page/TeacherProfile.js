@@ -20,12 +20,10 @@ export default function TeacherProfile() {
   const editor = useRef(null);
 
   useEffect(() => {
-    if (!user?.token) return;
-
     apiAxios.get(`/teacherProfile/${uno}`)
       .then(res => {
         setTeacherData(res.data.dto);
-        setProfileImage(res.data.dto.profileImg || ""); 
+        setProfileImage(res.data.profileImg || ""); 
 
         // 📌 데이터 도착 후 에디터 값 업데이트
         if (editor.current) {
@@ -57,16 +55,16 @@ export default function TeacherProfile() {
     }
   };
 
-  if (!user?.token) {
-    return <p>로그인이 필요합니다.</p>;
-  }
+ 
 
   return (
     <div className="teacher-background">
       <div className="teacher-profile-container">
         <div className="teacher-info-left">
           <div className="profile-pic">
-            {profileImage && <img src={profileImage} alt="Profile" className="profile-image" />}
+          {profileImage && (
+                  <img src={profileImage} alt="Profile" className="profile-image" />
+                )}
           </div>
           <h2 className="teacher-name">{teacherData?.name}</h2>
           <div className="teacher-email">

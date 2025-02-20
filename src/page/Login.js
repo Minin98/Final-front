@@ -12,6 +12,9 @@ export default function Login() {
   const pwd = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
+
+
   const loginHandler = () => {
     const data = {
       id : id.current.value,
@@ -39,6 +42,10 @@ export default function Login() {
     });
   }
   
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState); 
+  };
+
   return (
     <div className="login_container" >
       <div className="login_logo_container" >
@@ -48,7 +55,16 @@ export default function Login() {
       <p className='login_desc'><span style={{fontWeight: 'bold'}}>로그인</span>하여<br/> 다양한 서비스를 즐겨보세요.</p>
       <div className="login-form">
         <input type="text" ref={id} placeholder="아이디를 입력해주세요" />
-        <input type="password" ref={pwd} placeholder="비밀번호를 입력해주세요" />
+        <div className='password'>
+        <input type={showPassword ? "text" : "password"} ref={pwd} placeholder="비밀번호를 입력해주세요" />
+        <span className="password-toggle"> 
+        <img
+              src={showPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+              onClick={togglePasswordVisibility}
+              alt='비밀번호 숨김/보임'
+            />
+        </span>
+        </div>
         <p><a href="/find/id" className='find_pwd'>아이디</a> 혹은 <a href="/find/pwd" className='find_pwd'>비밀번호</a>를 잊으셨나요?</p>
         <button type="button" className='login_btn' onClick={loginHandler}>로그인</button> 
         <button type="button" className='register_btn' onClick={() => navigate('/register')}>회원가입</button>

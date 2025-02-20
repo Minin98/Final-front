@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import apiAxios from "../lib/apiAxios";
 import { useNavigate } from "react-router-dom";
 import '../css/ChangePwd.css';
@@ -7,6 +7,8 @@ export default function ChangePwd({ uno }) {
     const passwordRef = useRef(null);
     const confirmPasswordRef = useRef(null);
     const navigator = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,15}$/;
 
@@ -39,6 +41,15 @@ export default function ChangePwd({ uno }) {
             });
     };
 
+
+    const togglePasswordVisibility = () => {
+        setShowPassword((prevState) => !prevState); // 비밀번호 보이기/숨기기 토글
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword((prevState) => !prevState); // 확인 비밀번호 보이기/숨기기 토글
+    };
+
     return (
         <div className="emailCheck">
             <div className="changePwd">
@@ -49,10 +60,37 @@ export default function ChangePwd({ uno }) {
                     <li>이전에 사용한 적 없는 비밀번호가 안전합니다.</li>
                 </ul>
                 <div className="input_container">
-                <label>비밀번호 (영문, 숫자, 특수문자 포함 6~15자) <span className="required">*</span></label>
-                <input className="pwd" type="password" placeholder="새 비밀번호" ref={passwordRef} />
-                <label>비밀번호 확인 <span className="required">*</span></label>
-                <input className="pwd" type="password" placeholder="비밀번호 확인" ref={confirmPasswordRef} />
+                    <label>비밀번호 (영문, 숫자, 특수문자 포함 6~15자) <span className="required">*</span></label>
+                    <div className="password">
+                        <input
+                            className="pwd"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="새 비밀번호"
+                            ref={passwordRef}
+                        />
+                        <span className="password-toggle" onClick={togglePasswordVisibility}>
+                            <img
+                                src={showPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+                                alt="비밀번호 보이기/숨기기"
+                            />
+                        </span>
+                    </div>
+
+                    <label>비밀번호 확인 <span className="required">*</span></label>
+                    <div className="password">
+                        <input
+                            className="pwd"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="비밀번호 확인"
+                            ref={confirmPasswordRef}
+                        />
+                        <span className="password-toggle" onClick={toggleConfirmPasswordVisibility}>
+                            <img
+                                src={showConfirmPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+                                alt="비밀번호 확인 보이기/숨기기"
+                            />
+                        </span>
+                    </div>
                 <div className="btn_container">
                 </div>
                 <button onClick={handleChangePassword}>비밀번호 변경</button>

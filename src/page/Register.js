@@ -23,6 +23,8 @@ export default function Register() {
   const [emailValid, setEmailValid] = useState(false); // 이메일 인증 상태
   const [checkEmailValid, setCheckEmailValid] = useState(true); // 이메일 유효성 상태
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // 아이디 정규식 (영문, 숫자만 허용, 길이 6~15)
   const idRegex = /^[a-zA-Z0-9]{6,15}$/;
@@ -162,7 +164,13 @@ export default function Register() {
 
     return isValidId && isValidPassword && isValidConfirmPassword && !idDuplicate && !nicknameDuplicate && emailValid;
   };
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState); // 비밀번호 보이기/숨기기 토글
+  };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prevState) => !prevState); // 확인 비밀번호 보이기/숨기기 토글
+  };
   // 회원가입
   const register = () => {
     if (!validateForm()) {
@@ -240,22 +248,38 @@ export default function Register() {
             </div>
             <div className="form-group">
               <label>비밀번호 (영문, 숫자, 특수문자 포함 6~15자) *</label>
+              <div className='password'>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 ref={password}
                 required
                 onBlur={checkPassword}
               />
+              <span className="password-toggle" onClick={togglePasswordVisibility}>
+                <img
+                  src={showPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+                  alt="비밀번호 보이기/숨기기"
+                />
+              </span>
+              </div>
               {!passwordValid && <p className="error-message">비밀번호는 영문, 숫자, 특수문자 포함 6~15자여야 합니다.</p>}
             </div>
             <div className="form-group">
               <label>비밀번호 확인 *</label>
+              <div className='password'>
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 ref={checkPwd}
                 required
                 onBlur={checkConfirmPassword}
               />
+              <span className="password-toggle" onClick={toggleConfirmPasswordVisibility}>
+                <img
+                  src={showConfirmPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+                  alt="비밀번호 확인 보이기/숨기기"
+                />
+              </span>
+            </div>
               {!confirmPasswordValid && <p className="error-message">비밀번호가 일치하지 않습니다.</p>}
             </div>
           </div>

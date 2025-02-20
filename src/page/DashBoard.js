@@ -22,6 +22,10 @@ export default function DashBoard() {
     }
 
     useEffect(() => {
+        if (!user.token) {
+            alert("로그인이 필요합니다.");
+            navigate("/login");
+        }
         apiAxios.get("/dashboard", {
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -30,15 +34,24 @@ export default function DashBoard() {
         })
             .then((res) => {
                 if (userRole === 1) {
-                    // 강사일 경우 본인의 강의 목록을 가져옴
-                    setClassList(res.data.classList || []);
+                    const updatedClassList = (res.data.classList || []).map(classItem => ({
+                        ...classItem,
+                        thumbnail: classItem.thumbnail
+                          ? (classItem.thumbnail.startsWith("data:image")
+                            ? classItem.thumbnail
+                            : `data:image/png;base64,${classItem.thumbnail}`)
+                          : "/img/default_thumbnail.jpg"
+                    }));
+                    setClassList(updatedClassList);
                 } else {
                     // 수강생일 경우 수강 중인 강의를 가져옴
                     const updatedClasses = (res.data.recentClasses || []).map(classItem => ({
                         ...classItem,
                         thumbnail: classItem.thumbnail
-                            ? `http://${window.location.hostname}:9999/class/thumbnail/${classItem.thumbnail}`
-                            : "/img/default_thumbnail.jpg"
+                          ? (classItem.thumbnail.startsWith("data:image")
+                            ? classItem.thumbnail
+                            : `data:image/png;base64,${classItem.thumbnail}`)
+                          : "/img/default_thumbnail.jpg" 
                     }));
                     setRecentClasses(updatedClasses);
                     //퀴즈 진행률
@@ -76,7 +89,7 @@ export default function DashBoard() {
                                 <div className="dashboard-class-header">
 
                                     <img
-                                        src={classItem.thumbnail ? `http://${window.location.hostname}:9999/class/thumbnail/${classItem.thumbnail}` : "/img/default_thumbnail.jpg"}
+                                        src={classItem.thumbnail}
                                         alt="강의 썸네일"
                                         className="dashboard-class-thumbnail"
                                     />
@@ -108,7 +121,8 @@ export default function DashBoard() {
                                 <div className="dashboard-recentClass-card" key={classItem.usersProgressNumber} onClick={() => handleClassClick(classItem.classNumber)}>
                                     <img
                                         src={classItem.thumbnail}
-                                        alt="강의 썸네일"
+                                        alt={classItem.title}
+
                                         className="dashboard-class-thumbnail"
                                     />
                                     <div className="class-info">
