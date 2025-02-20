@@ -35,7 +35,7 @@ import TeacherProfile from "./page/TeacherProfile";
 
 function Layout() {
   const location = useLocation();
-  const hideHeaderFooter = ["/login"].includes(location.pathname) || location.pathname.startsWith("/video/");
+  const hideHeaderFooter = ["/login"].includes(location.pathname) || location.pathname.startsWith("/video/") || location.pathname.startsWith("/register");
   
 
   return (

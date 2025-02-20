@@ -257,7 +257,7 @@ export default function Register() {
               />
               <span className="password-toggle" onClick={togglePasswordVisibility}>
                 <img
-                  src={showPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+                  src={showPassword ? '/img/eye-opened.png' : '/img/eye-closed.png'}
                   alt="비밀번호 보이기/숨기기"
                 />
               </span>
@@ -275,7 +275,7 @@ export default function Register() {
               />
               <span className="password-toggle" onClick={toggleConfirmPasswordVisibility}>
                 <img
-                  src={showConfirmPassword ? '/img/eye-closed.png' : '/img/eye-opened.png'}
+                  src={showConfirmPassword ? '/img/eye-opened.png' : '/img/eye-closed.png'}
                   alt="비밀번호 확인 보이기/숨기기"
                 />
               </span>
