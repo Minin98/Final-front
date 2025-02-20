@@ -13,9 +13,9 @@ export default function Main() {
   const [classList, setClassList] = useState([]);
   const [classQuizProgress, setClassQuizProgress] = useState([]);
   const [profileImage, setProfileImage] = useState(null);//이미지 추가!
+  const [nickname, setNickname] = useState("guest");
 
   const navigate = useNavigate();
-  let nickname = "guest";
   let userRole = null;
   
   useEffect(() => {
@@ -65,18 +65,18 @@ export default function Main() {
           if (res.data.profileImg) {
             console.log("서버 응답:", res.data);
             setProfileImage(res.data.profileImg);
+            setNickname(res.data.nickname);
           }
         })
         .catch((err) => console.log("프로필 이미지 불러오기 실패:", err));
     }
-  }, [user.token]);
+  }, [user.token, nickname]);
 
   // JWT 토큰 디코딩
   if (user.token) {
     const decodeToken = jwtDecode(user.token);
     userRole = decodeToken.grade;
     const role = userRole === 1 ? "강사" : userRole === 2 ? "수강생" : "회원";
-    nickname = `${role} ${decodeToken.nickname}`;
   }
 
   // 강의 클릭 시 해당 강의 페이지로 이동
