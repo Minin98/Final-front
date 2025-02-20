@@ -14,9 +14,11 @@ export default function Register() {
   const phone = useRef(null);
   const [role, setRole] = useState("student");
   const [nicknameDuplicate, setNicknameDuplicate] = useState(false);
+  const [nicknameValid, setNicknameValid] = useState(true); // 닉네임 유효성 상태
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  //닉네임 정규식
+  const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
 
   // 닉네임 중복 체크 (POST 방식)
   const checkNicknameDuplicate = () => {
@@ -30,7 +32,15 @@ export default function Register() {
       }
     }).catch((err) => console.log(err));
   };
-
+  //닉네임 유효성 검사
+  const checkNickname = () => {
+    if (!nicknameRegex.test(nickname.current.value)) {
+      setNicknameValid(false);
+      return false;
+    }
+    setNicknameValid(true);
+    return true;
+  }
   const register = () => {
     if (nicknameDuplicate) {
       alert("닉네임이 중복되었습니다. 다른 닉네임을 입력해주세요.");
@@ -83,10 +93,13 @@ export default function Register() {
             <input type="text" ref={username} required />
           </div>
           <div className="form-group">
-            <label>닉네임 * <button type="button" className="check-duplicate-btn" onClick={checkNicknameDuplicate}>
+            <label>닉네임 (특수문자를 제외한 2~10자를 입력해주세요.) * <button type="button" className="check-duplicate-btn" onClick={checkNicknameDuplicate}>
               닉네임 중복 확인
             </button></label>
-            <input type="text" ref={nickname} />
+            <input type="text" ref={nickname}
+              onBlur={checkNickname}
+            />
+            {!nicknameValid && <p className="error-message">닉네임을 다시 입력해주세요.</p>}
             {nicknameDuplicate && <p className="error-message">닉네임이 이미 존재합니다.</p>}
           </div>
           <div className="form-group">
@@ -95,7 +108,14 @@ export default function Register() {
           </div>
           <div className="form-group">
             <label>전화번호 *</label>
-            <input type="text" ref={phone} placeholder="'-'를 제외하고 숫자만 입력해주세요." />
+            <input
+              type="text"
+              ref={phone}
+              placeholder="'-'를 제외하고 숫자만 입력해주세요."
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 11); // 숫자만 입력 & 11자리 제한
+              }}
+            />
           </div>
           <input type="hidden" value={kakaoId} /> {/* 카카오 ID 숨김 처리 */}
           <p className="required-note">* 표시는 필수 입력입니다.</p>

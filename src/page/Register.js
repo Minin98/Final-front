@@ -237,7 +237,7 @@ export default function Register() {
               {idDuplicate && <p className="error-message">아이디가 이미 존재합니다.</p>}
             </div>
             <div className="form-group">
-              <label>닉네임 (한글, 영문, 숫자 2~10자를 입력해주세요.)* <button type="button" className="check-duplicate-btn" onClick={checkNicknameDuplicate}>
+              <label>닉네임 (특수문자를 제외한 2~10자를 입력해주세요.)* <button type="button" className="check-duplicate-btn" onClick={checkNicknameDuplicate}>
                 닉네임 중복 확인
               </button></label>
               <input type="text" ref={nickname}
