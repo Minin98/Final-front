@@ -157,7 +157,7 @@ export default function Main() {
                 <h3 className="sidebar-title">등록된 강의</h3>
                 <div className="recentClass-container">
                   {classList.length > 0 ? (
-                    classList.map((classItem) => (
+                    classList.slice(0, 10).map((classItem) => (
                       <div
                         className="sidebar-recentClass-container"
                         key={classItem.classNumber}

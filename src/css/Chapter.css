@@ -13,12 +13,12 @@
 /* 챕터 헤더 */
 .chapter-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
     font-size: 16px;
     font-weight: bold;
     padding: 5px 0px;
+    gap: 20px;
 }
 
 /* 챕터명과 강의 개수를 정렬 */
@@ -46,6 +46,16 @@
     color: #666;
     font-weight: bold;
 }
+
+.add-video-container,
+.add-chapter-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+    width: 100%;
+}
+
 
 /* 챕터 추가 입력창 스타일 수정 */
 .add-chapter-input, .update-chapter-container {
@@ -106,8 +116,10 @@
 
 
 .instructor-actions {
+    width: 352px;
     display: flex;
     gap: 10px;
+    justify-content: flex-end;
 }
 
 .instructor-actions button {
@@ -139,7 +151,7 @@
     padding: 5px 0;
     border-bottom: 1px solid #ddd;
     font-size: 15px;
-    gap: 15px;
+    gap: 10px;
 }
 
 /* 영상 제목 스타일 */
@@ -152,10 +164,12 @@
     text-overflow: ellipsis;
     max-width: 500px; /* 영상 제목 최대 너비 설정 */
     flex-grow: 1;
+    width: 485px;
 }
 
 /* 영상 시간 스타일 */
 .video-duration {
+    width: 250px;
     font-size: 14px;
     color: #555;
     text-align: right;
@@ -167,7 +181,11 @@
 /* 버튼 그룹 */
 .instructor-video-controls {
     display: flex;
+    width: 352px;
+    justify-content: flex-end;
+    align-items: center;
     gap: 5px;
+    margin-right: 15px;
 }
 
 /* 버튼 스타일 */
@@ -190,19 +208,20 @@
 
 .add-chapter,
 .add-video {
-    background-color: #ff8c00;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
+    background-color: #fff;
+    color: #ff8c00;
+    padding: 10px 10px;
     margin-top: 10px;
+    border: 1px solid #ff8c00;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 .add-chapter:hover,
 .add-video:hover {
-    background-color: #e28411;
+    background-color: #ff8c00;
+    color: #fff;
 }
 
 /* 영상 수정*/
