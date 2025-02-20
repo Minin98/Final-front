@@ -107,8 +107,7 @@ export default function MypageInfo() {
     } else {
         setProfileImage("/default-profile.png"); // 기본 이미지 설정
     }
-    
-
+  
       setIsUploadEnabled(false);
       alert("프로필 사진이 변경되었습니다.");
       setDataRoad(!dataRoad);
@@ -158,6 +157,22 @@ export default function MypageInfo() {
       return;
     }
 
+    if (updatedData.email) {
+      // '@'가 포함되어 있고 '.com'으로 끝나는지 확인
+      if (!updatedData.email.includes("@") || !updatedData.email.endsWith(".com")) {
+        alert("이메일 형식이 정상적이지 않습니다.");
+        return;
+      }
+    }
+
+    if (updatedData.phone) {
+      // 정규식을 이용해 숫자 11자리인지 확인
+      if (!/^\d{11}$/.test(updatedData.phone)) {
+        alert("전화번호는 11자리 숫자만 입력 가능합니다.");
+        return;
+      }
+    }
+
     console.log("전송할 데이터:", updatedData);
 
     try {
@@ -168,6 +183,7 @@ export default function MypageInfo() {
       console.log(res.data);
       if (res.data) {
         alert("정보 변경 완료");
+        window.location.reload();
       }
 
       // 업데이트 완료 후 최신 데이터 불러오기
@@ -197,14 +213,30 @@ export default function MypageInfo() {
   };
 
   const changeValue = (e) => {
-    const id = e.target.id;
-    // console.log(id);
-
-    setUserInfo(prev => ({
-      ...prev,
-      [id]: inputRefs.current[id] ? inputRefs.current[id].value : "",
-    }));
+    const { id, value } = e.target;
+    
+    // phone 필드라면 입력값을 숫자 11자리로만 제한
+    if (id === "phone") {
+      // 숫자 이외의 문자 제거
+      let onlyNumber = value.replace(/[^0-9]/g, "");
+      // 길이를 11자리까지만 허용
+      if (onlyNumber.length > 11) {
+        onlyNumber = onlyNumber.slice(0, 11);
+      }
+  
+      setUserInfo((prev) => ({
+        ...prev,
+        [id]: onlyNumber,
+      }));
+    } else {
+      // phone이 아닌 다른 필드는 기존 로직대로
+      setUserInfo((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
   };
+  
 
   const tokenlenth = () => {
     const decodedToken = jwtDecode(token);

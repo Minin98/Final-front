@@ -38,15 +38,36 @@
 
 
 .profile-image {
+  /* 원하는 크기를 일단 정사각형으로 고정 */
   width: 150px;
   height: 150px;
+
+  /* 원형으로 만들기 위해서 반지름을 50%로 설정 */
   border-radius: 50%;
+
+  /* 이미지를 ‘비율을 유지한 채’ 영역에 꽉 채우되,
+     영역 밖으로 넘치는 부분은 잘라 버림 */
+  object-fit: cover;
+
+  /* 불필요한 여백이나 줄바꿈 방지를 위해 block으로 선언 */
+  display: block;
+
+  /* 혹시 이미지 위치를 조절하고 싶다면 (중앙 기준으로 잘라내기) */
+  object-position: center;
 }
+
 
 .profile-section h1 {
   font-size: 20px;
   line-height: 1.8;
   margin: 10px 0px;
+}
+
+.profile-section label {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+
 }
 
 .profile-buttons {

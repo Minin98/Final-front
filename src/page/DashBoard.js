@@ -23,8 +23,8 @@ export default function DashBoard() {
 
     useEffect(() => {
         if (!user.token) {
-            alert("로그인이 필요합니다.");
             navigate("/login");
+            return;
         }
         apiAxios.get("/dashboard", {
             headers: {

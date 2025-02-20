@@ -12,6 +12,7 @@ import RateWrite from "./RateWrite";
 import "../css/ClassPage.css";
 import { jwtDecode } from "jwt-decode";
 import StarRating from "../components/StarRating";
+import Chat from "./Chat.js";
 
 export default function ClassPage() {
     const { classNumber } = useParams();
@@ -171,6 +172,7 @@ export default function ClassPage() {
                 <button className={activeMenu === "notice" ? "active" : ""} onClick={() => handleMenuChange("notice")}>공지사항</button>
                 <button className={activeMenu === "qna" ? "active" : ""} onClick={() => handleMenuChange("qna")}>Q&A</button>
                 <button className={activeMenu === "rate" ? "active" : ""} onClick={() => handleMenuChange("rate")}>수강평</button>
+                <button className={activeMenu === "chat" ? "active" : ""} onClick={() => handleMenuChange("chat")}>채팅</button>
             </div>
 
             {/* 강의 컨텐츠 */}
@@ -183,6 +185,7 @@ export default function ClassPage() {
                 {activeMenu === "rate" && (
                     rateWriting ? <RateWrite setRateWriting={setRateWriting} /> : <Rate setRateWriting={setRateWriting} />
                 )}
+                 {activeMenu === "chat" && <Chat classNumber={classNumber} />}
             </div>
 
             {showUpdateModal && <ClassUpdate classInfo={classInfo} onClose={() => setShowUpdateModal(false)} onClassUpdated={updateHandler} />}
