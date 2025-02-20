@@ -107,7 +107,7 @@ export default function DashBoard() {
                     ) : (
                         <p className="no-classes">등록된 강의가 없습니다.</p>
                     )}
-                </div>
+                    </div>
             ) : (
                 // 수강생 화면
                 <div className="dashboard-student">

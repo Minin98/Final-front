@@ -58,6 +58,7 @@
     flex-flow: column nowrap;
     justify-content: center;
     gap: 20px;
+    max-width: 250px;
 }
 
 .dashboard-class-info > p {
